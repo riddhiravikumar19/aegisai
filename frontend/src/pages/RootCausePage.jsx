@@ -1,14 +1,6 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
-
-const sampleMachine = {
-    Type: 0,
-    air_temperature: 310.0,
-    process_temperature: 320.0,
-    rotational_speed: 1200,
-    torque: 75.0,
-    tool_wear: 250,
-  };
+import { useMachine } from "../context/MachineContext";
 
 function formatFeatureName(feature) {
   const names = {
@@ -26,8 +18,14 @@ function formatFeatureName(feature) {
 export default function RootCausePage() {
   const [causes, setCauses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { selectedMachine } = useMachine();
 
   async function runExplanation() {
+    if (!selectedMachine) {
+      alert("Please select a machine from Live Monitoring first.");
+      return;
+    }
+
     setLoading(true);
 
     const res = await fetch("http://127.0.0.1:8000/explain", {
@@ -35,7 +33,14 @@ export default function RootCausePage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(sampleMachine),
+      body: JSON.stringify({
+        Type: selectedMachine.type,
+        air_temperature: selectedMachine.air_temperature,
+        process_temperature: selectedMachine.process_temperature,
+        rotational_speed: selectedMachine.rotational_speed,
+        torque: selectedMachine.torque,
+        tool_wear: selectedMachine.tool_wear,
+      }),
     });
 
     const data = await res.json();
@@ -51,9 +56,25 @@ export default function RootCausePage() {
           Root Cause Analysis
         </h1>
 
-        <p style={{ color: "#8892A4", marginBottom: "32px" }}>
+        <p style={{ color: "#8892A4", marginBottom: "20px" }}>
           Real SHAP-based explainability showing how each feature influenced the model prediction.
         </p>
+
+        {selectedMachine && (
+          <div
+            style={{
+              marginBottom: "24px",
+              padding: "14px 18px",
+              borderRadius: "14px",
+              background: "rgba(0,212,255,0.08)",
+              border: "1px solid rgba(0,212,255,0.2)",
+              color: "#00D4FF",
+              fontWeight: 700,
+            }}
+          >
+            Selected Machine: {selectedMachine.machine_id}
+          </div>
+        )}
 
         <button
           onClick={runExplanation}
@@ -91,7 +112,9 @@ export default function RootCausePage() {
 
             {causes.length === 0 ? (
               <p style={{ color: "#8892A4" }}>
-                Click the button to generate a real SHAP explanation from the FastAPI backend.
+                {selectedMachine
+                  ? "Click the button to generate SHAP explanation for the selected machine."
+                  : "Select a machine from Live Monitoring first."}
               </p>
             ) : (
               causes.map((cause) => {

@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageShell from "../components/PageShell";
+import { useMachine } from "../context/MachineContext";
 
 export default function PredictionPage() {
+  const { selectedMachine } = useMachine();
+
   const [form, setForm] = useState({
     Type: 0,
     air_temperature: 298.1,
@@ -12,6 +15,20 @@ export default function PredictionPage() {
   });
 
   const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (selectedMachine) {
+      setForm({
+        Type: selectedMachine.type,
+        air_temperature: selectedMachine.air_temperature,
+        process_temperature: selectedMachine.process_temperature,
+        rotational_speed: selectedMachine.rotational_speed,
+        torque: selectedMachine.torque,
+        tool_wear: selectedMachine.tool_wear,
+      });
+      setResult(null);
+    }
+  }, [selectedMachine]);
 
   function updateField(field, value) {
     setForm({
@@ -34,41 +51,11 @@ export default function PredictionPage() {
   }
 
   const fields = [
-    {
-      key: "air_temperature",
-      label: "Air Temperature [K]",
-      min: 250,
-      max: 350,
-      step: 0.1,
-    },
-    {
-      key: "process_temperature",
-      label: "Process Temperature [K]",
-      min: 250,
-      max: 400,
-      step: 0.1,
-    },
-    {
-      key: "rotational_speed",
-      label: "Rotational Speed [rpm]",
-      min: 1000,
-      max: 3000,
-      step: 1,
-    },
-    {
-      key: "torque",
-      label: "Torque [Nm]",
-      min: 0,
-      max: 100,
-      step: 0.1,
-    },
-    {
-      key: "tool_wear",
-      label: "Tool Wear [min]",
-      min: 0,
-      max: 300,
-      step: 1,
-    },
+    ["air_temperature", "Air Temperature [K]", 250, 350, 0.1],
+    ["process_temperature", "Process Temperature [K]", 250, 400, 0.1],
+    ["rotational_speed", "Rotational Speed [rpm]", 1000, 3000, 1],
+    ["torque", "Torque [Nm]", 0, 100, 0.1],
+    ["tool_wear", "Tool Wear [min]", 0, 300, 1],
   ];
 
   return (
@@ -78,9 +65,25 @@ export default function PredictionPage() {
           Live Failure Prediction
         </h1>
 
-        <p style={{ color: "#8892A4", marginBottom: "32px" }}>
+        <p style={{ color: "#8892A4", marginBottom: "20px" }}>
           Send machine telemetry to the FastAPI backend and receive real ML model predictions.
         </p>
+
+        {selectedMachine && (
+          <div
+            style={{
+              marginBottom: "24px",
+              padding: "14px 18px",
+              borderRadius: "14px",
+              background: "rgba(0,212,255,0.08)",
+              border: "1px solid rgba(0,212,255,0.2)",
+              color: "#00D4FF",
+              fontWeight: 700,
+            }}
+          >
+            Selected Machine: {selectedMachine.machine_id}
+          </div>
+        )}
 
         <div
           style={{
@@ -105,14 +108,7 @@ export default function PredictionPage() {
               <select
                 value={form.Type}
                 onChange={(e) => updateField("Type", Number(e.target.value))}
-                style={{
-                  width: "100%",
-                  background: "#0A0B0F",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "12px",
-                  padding: "12px",
-                  color: "#F0F2F8",
-                }}
+                style={inputStyle}
               >
                 <option value={0}>L - Low Quality</option>
                 <option value={1}>M - Medium Quality</option>
@@ -120,27 +116,20 @@ export default function PredictionPage() {
               </select>
             </div>
 
-            {fields.map((field) => (
-              <div key={field.key} style={{ marginBottom: "18px" }}>
+            {fields.map(([key, label, min, max, step]) => (
+              <div key={key} style={{ marginBottom: "18px" }}>
                 <label style={{ display: "block", color: "#8892A4", marginBottom: "8px" }}>
-                  {field.label}
+                  {label}
                 </label>
 
                 <input
                   type="number"
-                  min={field.min}
-                  max={field.max}
-                  step={field.step}
-                  value={form[field.key]}
-                  onChange={(e) => updateField(field.key, Number(e.target.value))}
-                  style={{
-                    width: "100%",
-                    background: "#0A0B0F",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "12px",
-                    padding: "12px",
-                    color: "#F0F2F8",
-                  }}
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={form[key]}
+                  onChange={(e) => updateField(key, Number(e.target.value))}
+                  style={inputStyle}
                 />
               </div>
             ))}
@@ -187,7 +176,9 @@ export default function PredictionPage() {
               </>
             ) : (
               <p style={{ color: "#8892A4" }}>
-                Enter machine telemetry and run prediction.
+                {selectedMachine
+                  ? "Selected machine loaded. Run prediction to analyze failure risk."
+                  : "Enter machine telemetry or select a machine from Live Monitoring."}
               </p>
             )}
           </div>
@@ -196,3 +187,12 @@ export default function PredictionPage() {
     </PageShell>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  background: "#0A0B0F",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: "12px",
+  padding: "12px",
+  color: "#F0F2F8",
+};
