@@ -66,10 +66,10 @@ def generate_priority_queue(machines: list[MachineInput]):
           action = "Routine monitoring"
 
         priority_score = round(
-            risk
-            + (100 - health)
+
+            (risk * 1.5)
             + urgency_weight
-            + (100 - rul),
+            + max(0, 45 - rul),
             2,
         )
 
