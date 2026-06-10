@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.insights import router as insights_router
 from api.live_data import router as live_router
 from api.explain import router as explain_router
 
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(live_router)
 app.include_router(explain_router)
+app.include_router(insights_router)
 
 
 class MachineInput(BaseModel):
@@ -131,4 +133,59 @@ def estimate_rul(data: MachineInput):
         "risk_score": risk_score,
         "urgency": urgency,
         "recommendation": recommendation,
+    }
+
+
+@app.post("/cost-savings")
+def estimate_cost_savings(data: MachineInput):
+    rul_result = estimate_rul(data)
+
+    machine_type_profiles = {
+        0: {"label": "L", "hourly_loss": 8000, "base_parts": 12000},
+        1: {"label": "M", "hourly_loss": 15000, "base_parts": 22000},
+        2: {"label": "H", "hourly_loss": 25000, "base_parts": 35000},
+    }
+
+    profile = machine_type_profiles.get(data.Type, machine_type_profiles[1])
+
+    estimated_rul = rul_result["estimated_rul_days"]
+    urgency = rul_result["urgency"]
+    risk_score = rul_result["risk_score"]
+
+    expected_downtime_hours = max(2, round(18 - (estimated_rul / 8)))
+
+    if urgency == "Critical":
+        expected_downtime_hours += 10
+    elif urgency == "High":
+        expected_downtime_hours += 6
+    elif urgency == "Medium":
+        expected_downtime_hours += 3
+
+    emergency_failure_cost = (
+        expected_downtime_hours * profile["hourly_loss"]
+        + profile["base_parts"]
+        + 30000
+    )
+
+    preventive_maintenance_cost = round(
+        profile["base_parts"] * 0.55 + 12000 + (risk_score * 120)
+    )
+
+    savings = max(0, emergency_failure_cost - preventive_maintenance_cost)
+    roi = (
+        round((savings / preventive_maintenance_cost) * 100)
+        if preventive_maintenance_cost
+        else 0
+    )
+
+    return {
+        "machine_type": profile["label"],
+        "estimated_rul_days": estimated_rul,
+        "urgency": urgency,
+        "risk_score": risk_score,
+        "expected_downtime_hours": expected_downtime_hours,
+        "emergency_failure_cost": int(emergency_failure_cost),
+        "preventive_maintenance_cost": int(preventive_maintenance_cost),
+        "potential_savings": int(savings),
+        "roi": roi,
     }
