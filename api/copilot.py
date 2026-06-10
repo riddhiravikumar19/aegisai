@@ -1,15 +1,7 @@
-import os
-from fastapi import APIRouter
+﻿from fastapi import APIRouter
 from pydantic import BaseModel
-from dotenv import load_dotenv
-from openai import OpenAI
-
-load_dotenv()
 
 router = APIRouter()
-
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key) if api_key else None
 
 
 class CopilotRequest(BaseModel):
@@ -26,80 +18,34 @@ class CopilotRequest(BaseModel):
 
 @router.post("/copilot")
 def copilot(data: CopilotRequest):
-    context = f"""
-Machine ID: {data.machine_id}
-Failure Probability: {data.failure_probability}
-Health Score: {data.health_score}
-Risk Level: {data.risk_level}
-Remaining Useful Life: {data.rul_days} days
-Urgency: {data.urgency}
-Potential Savings: ₹{data.potential_savings}
-Root Causes: {data.root_causes}
-User Question: {data.question}
-"""
-    if client is None:
     fallback = f"""
 AegisAI Copilot Report
 
-Machine {data.machine_id} currently has a failure probability of {data.failure_probability}% 
-and a health score of {data.health_score}/100.
+Machine: {data.machine_id}
 
+Failure Probability: {data.failure_probability}%
+Health Score: {data.health_score}/100
 Risk Level: {data.risk_level}
+
 Remaining Useful Life: {data.rul_days} days
 Urgency: {data.urgency}
 
-Recommended Action:
-Based on the current risk and RUL, maintenance should be prioritized according to the urgency level.
+Potential Savings: ₹{data.potential_savings}
 
-Business Impact:
-Potential avoidable savings are estimated at ₹{data.potential_savings}.
-"""
-    return {"answer": fallback, "mode": "fallback"}
-
-    try:
-        response = client.responses.create(
-            model="gpt-4o-mini",
-            input=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are AegisAI Copilot, an industrial predictive maintenance assistant. "
-                        "Explain machine health, failure risk, root causes, RUL, and maintenance actions "
-                        "clearly for engineers and operations managers. Be practical and concise."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": context,
-                },
-            ],
-        )
-
-        return {
-            "answer": response.output_text,
-            "mode": "openai",
-        }
-
-    except Exception:
-        fallback = f"""
-AegisAI Copilot Report
-
-Machine {data.machine_id} currently has a failure probability of {data.failure_probability}% 
-and a health score of {data.health_score}/100.
-
-Risk Level: {data.risk_level}
-Remaining Useful Life: {data.rul_days} days
-Urgency: {data.urgency}
+Root Causes:
+{data.root_causes}
 
 Recommended Action:
-Based on the current risk and RUL, maintenance should be prioritized according to the urgency level. 
-If urgency is Critical or High, schedule inspection immediately. If urgency is Medium or Low, continue monitoring and plan preventive maintenance.
+- Critical: Immediate shutdown and inspection.
+- High: Schedule maintenance within one week.
+- Medium: Preventive maintenance required.
+- Low: Continue routine monitoring.
 
 Business Impact:
-Potential avoidable savings are estimated at ₹{data.potential_savings} if proactive maintenance is performed.
+This machine should be prioritized based on its failure probability, remaining useful life, urgency, and potential avoidable cost.
 """
 
-        return {
-            "answer": fallback,
-            "mode": "fallback",
-        }
+    return {
+        "answer": fallback,
+        "mode": "fallback"
+    }
