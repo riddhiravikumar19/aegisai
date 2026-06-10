@@ -8,7 +8,8 @@ load_dotenv()
 
 router = APIRouter()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key) if api_key else None
 
 
 class CopilotRequest(BaseModel):
@@ -36,6 +37,24 @@ Potential Savings: ₹{data.potential_savings}
 Root Causes: {data.root_causes}
 User Question: {data.question}
 """
+    if client is None:
+    fallback = f"""
+AegisAI Copilot Report
+
+Machine {data.machine_id} currently has a failure probability of {data.failure_probability}% 
+and a health score of {data.health_score}/100.
+
+Risk Level: {data.risk_level}
+Remaining Useful Life: {data.rul_days} days
+Urgency: {data.urgency}
+
+Recommended Action:
+Based on the current risk and RUL, maintenance should be prioritized according to the urgency level.
+
+Business Impact:
+Potential avoidable savings are estimated at ₹{data.potential_savings}.
+"""
+    return {"answer": fallback, "mode": "fallback"}
 
     try:
         response = client.responses.create(
