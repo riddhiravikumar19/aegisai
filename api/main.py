@@ -8,6 +8,8 @@ from api.insights import router as insights_router
 from api.live_data import router as live_router
 from api.explain import router as explain_router
 from api.priority import router as priority_router
+from api.copilot import router as copilot_router
+
 model = joblib.load("models/aegis_model.pkl")
 
 app = FastAPI(title="AegisAI Prediction API")
@@ -24,7 +26,7 @@ app.include_router(live_router)
 app.include_router(explain_router)
 app.include_router(insights_router)
 app.include_router(priority_router)
-
+app.include_router(copilot_router)
 class MachineInput(BaseModel):
     Type: int
     air_temperature: float
