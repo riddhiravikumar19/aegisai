@@ -37,7 +37,6 @@ Root Causes: {data.root_causes}
 User Question: {data.question}
 """
 
-
     try:
         response = client.responses.create(
             model="gpt-4o-mini",
@@ -57,11 +56,15 @@ User Question: {data.question}
             ],
         )
 
-     return {"answer": response.output_text, "mode": "openai"}
-  
+        return {
+            "answer": response.output_text,
+            "mode": "openai",
+        }
+
     except Exception:
         fallback = f"""
 AegisAI Copilot Report
+
 Machine {data.machine_id} currently has a failure probability of {data.failure_probability}% 
 and a health score of {data.health_score}/100.
 
@@ -76,4 +79,8 @@ If urgency is Critical or High, schedule inspection immediately. If urgency is M
 Business Impact:
 Potential avoidable savings are estimated at ₹{data.potential_savings} if proactive maintenance is performed.
 """
-      return {"answer": fallback, "mode": "fallback"}
+
+        return {
+            "answer": fallback,
+            "mode": "fallback",
+        }
