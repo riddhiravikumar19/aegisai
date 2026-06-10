@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
+import { API_BASE_URL } from "../lib/api";
 
 function formatFeatureName(feature) {
   const names = {
@@ -28,7 +29,7 @@ export default function RootCausePage() {
 
     setLoading(true);
 
-    const res = await fetch("http://127.0.0.1:8000/explain", {
+    const res = await fetch(`${API_BASE_URL}/explain`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

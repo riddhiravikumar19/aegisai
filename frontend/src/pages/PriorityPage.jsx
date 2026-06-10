@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PageShell from "../components/PageShell";
+import { API_BASE_URL } from "../lib/api";
 
 function getColor(urgency) {
   if (urgency === "Critical") return "#FF3B5C";
@@ -21,7 +22,7 @@ export default function PriorityPage() {
       const seenMachines = new Set();
 
       for (let i = 0; i < 40; i++) {
-        const res = await fetch("http://127.0.0.1:8000/live-machines");
+        const res = await fetch(`${API_BASE_URL}/live-machines`);
         const machine = await res.json();
 
         if (!seenMachines.has(machine.machine_id)) {
@@ -41,7 +42,7 @@ export default function PriorityPage() {
 
       setScannedCount(collected.length);
 
-      const priorityRes = await fetch("http://127.0.0.1:8000/priority", {
+      const priorityRes = await fetch(`${API_BASE_URL}/priority`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,16 +134,8 @@ export default function PriorityPage() {
                 </div>
 
                 <div>
-                  <div style={{ color: "#8892A4", fontSize: "12px" }}>
-                    Machine
-                  </div>
-                  <div
-                    style={{
-                      color: "#F0F2F8",
-                      fontSize: "22px",
-                      fontWeight: 700,
-                    }}
-                  >
+                  <div style={{ color: "#8892A4", fontSize: "12px" }}>Machine</div>
+                  <div style={{ color: "#F0F2F8", fontSize: "22px", fontWeight: 700 }}>
                     {item.machine_id}
                   </div>
                 </div>
@@ -158,9 +151,7 @@ export default function PriorityPage() {
                 </div>
 
                 <div>
-                  <div style={{ color: "#8892A4", fontSize: "12px" }}>
-                    Priority
-                  </div>
+                  <div style={{ color: "#8892A4", fontSize: "12px" }}>Priority</div>
                   <div style={{ color }}>{item.priority_score}</div>
                 </div>
 

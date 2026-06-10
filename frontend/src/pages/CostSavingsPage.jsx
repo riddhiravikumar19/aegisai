@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
+import { API_BASE_URL } from "../lib/api";
 
 export default function CostSavingsPage() {
   const { selectedMachine } = useMachine();
@@ -16,7 +17,7 @@ export default function CostSavingsPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://127.0.0.1:8000/cost-savings", {
+      const res = await fetch(`${API_BASE_URL}/cost-savings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,37 +95,12 @@ export default function CostSavingsPage() {
                 gap: "24px",
               }}
             >
-              <Card
-                title="Emergency Failure Cost"
-                value={`₹${result.emergency_failure_cost.toLocaleString()}`}
-                color="#FF3B5C"
-              />
-
-              <Card
-                title="Preventive Maintenance Cost"
-                value={`₹${result.preventive_maintenance_cost.toLocaleString()}`}
-                color="#FFB547"
-              />
-
-              <Card
-                title="Potential Savings"
-                value={`₹${result.potential_savings.toLocaleString()}`}
-                color="#00E5A0"
-              />
-
+              <Card title="Emergency Failure Cost" value={`₹${result.emergency_failure_cost.toLocaleString()}`} color="#FF3B5C" />
+              <Card title="Preventive Maintenance Cost" value={`₹${result.preventive_maintenance_cost.toLocaleString()}`} color="#FFB547" />
+              <Card title="Potential Savings" value={`₹${result.potential_savings.toLocaleString()}`} color="#00E5A0" />
               <Card title="ROI" value={`${result.roi}%`} color="#00D4FF" />
-
-              <Card
-                title="Expected Downtime"
-                value={`${result.expected_downtime_hours} hrs`}
-                color="#A78BFA"
-              />
-
-              <Card
-                title="RUL"
-                value={`${result.estimated_rul_days} days`}
-                color="#00E5A0"
-              />
+              <Card title="Expected Downtime" value={`${result.expected_downtime_hours} hrs`} color="#A78BFA" />
+              <Card title="RUL" value={`${result.estimated_rul_days} days`} color="#00E5A0" />
             </div>
 
             <div
@@ -140,23 +116,15 @@ export default function CostSavingsPage() {
 
               <p style={{ color: "#8892A4", lineHeight: 1.8 }}>
                 AegisAI estimates that {selectedMachine.machine_id} is a{" "}
-                <strong style={{ color: "#00D4FF" }}>
-                  {result.machine_type}-type machine
-                </strong>{" "}
+                <strong style={{ color: "#00D4FF" }}>{result.machine_type}-type machine</strong>{" "}
                 with an RUL of{" "}
-                <strong style={{ color: "#00D4FF" }}>
-                  {result.estimated_rul_days} days
-                </strong>{" "}
+                <strong style={{ color: "#00D4FF" }}>{result.estimated_rul_days} days</strong>{" "}
                 and urgency level{" "}
                 <strong style={{ color: "#FFB547" }}>{result.urgency}</strong>.
                 If the machine fails unexpectedly, the estimated downtime impact is{" "}
-                <strong style={{ color: "#A78BFA" }}>
-                  {result.expected_downtime_hours} hours
-                </strong>
-                . Proactive maintenance could avoid approximately{" "}
-                <strong style={{ color: "#00E5A0" }}>
-                  ₹{result.potential_savings.toLocaleString()}
-                </strong>{" "}
+                <strong style={{ color: "#A78BFA" }}>{result.expected_downtime_hours} hours</strong>.
+                Proactive maintenance could avoid approximately{" "}
+                <strong style={{ color: "#00E5A0" }}>₹{result.potential_savings.toLocaleString()}</strong>{" "}
                 in emergency downtime and repair losses.
               </p>
             </div>
@@ -182,7 +150,6 @@ function Card({ title, value, color }) {
       }}
     >
       <div style={{ color: "#8892A4", marginBottom: "14px" }}>{title}</div>
-
       <div style={{ fontSize: "34px", fontWeight: 700, color }}>{value}</div>
     </div>
   );

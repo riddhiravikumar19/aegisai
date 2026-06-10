@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
+import { API_BASE_URL } from "../lib/api";
 
 function getColor(level) {
   if (level === "High") return "#FF3B5C";
@@ -20,10 +21,10 @@ export default function LiveMonitoringPage() {
     try {
       setLoading(true);
 
-      const liveRes = await fetch("http://127.0.0.1:8000/live-machines");
+      const liveRes = await fetch(`${API_BASE_URL}/live-machines`);
       const liveData = await liveRes.json();
 
-      const predictRes = await fetch("http://127.0.0.1:8000/predict", {
+      const predictRes = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

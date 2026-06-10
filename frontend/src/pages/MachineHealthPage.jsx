@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import PageShell from "../components/PageShell";
+import { API_BASE_URL } from "../lib/api";
 
 function getHealthStatus(health) {
   if (health >= 90) return { label: "Excellent", color: "#00E5A0" };
@@ -20,7 +21,7 @@ export default function MachineHealthPage() {
       const seen = new Set();
 
       for (let i = 0; i < 20; i++) {
-        const liveRes = await fetch("http://127.0.0.1:8000/live-machines");
+        const liveRes = await fetch(`${API_BASE_URL}/live-machines`);
         const liveData = await liveRes.json();
 
         if (seen.has(liveData.machine_id)) continue;
@@ -35,7 +36,7 @@ export default function MachineHealthPage() {
           tool_wear: liveData.tool_wear,
         };
 
-        const predictRes = await fetch("http://127.0.0.1:8000/predict", {
+        const predictRes = await fetch(`${API_BASE_URL}/predict`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

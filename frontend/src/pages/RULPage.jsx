@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
+import { API_BASE_URL } from "../lib/api";
 
 function getUrgencyColor(level) {
   if (level === "Critical") return "#FF3B5C";
@@ -24,7 +25,7 @@ export default function RULPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://127.0.0.1:8000/rul", {
+      const res = await fetch(`${API_BASE_URL}/rul`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -142,9 +143,7 @@ export default function RULPage() {
                   Urgency: {result.urgency}
                 </div>
 
-                <p style={{ color: "#8892A4" }}>
-                  {result.recommendation}
-                </p>
+                <p style={{ color: "#8892A4" }}>{result.recommendation}</p>
               </>
             ) : (
               <p style={{ color: "#8892A4" }}>

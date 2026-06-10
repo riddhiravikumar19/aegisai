@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../lib/api";
 import { useEffect, useState } from "react";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
@@ -38,7 +39,7 @@ export default function PredictionPage() {
   }
 
   async function predictRisk() {
-    const res = await fetch("http://127.0.0.1:8000/predict", {
+    const res = await fetch(`${API_BASE_URL}/predict`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

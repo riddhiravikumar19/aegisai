@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/PageShell";
 import { useMachine } from "../context/MachineContext";
+import { API_BASE_URL } from "../lib/api";
 
 function getAlertColor(severity) {
   if (severity === "Critical") return "#FF3B5C";
@@ -31,13 +32,13 @@ export default function AlertCenterPage() {
       tool_wear: selectedMachine.tool_wear,
     };
 
-    const predictRes = await fetch("http://127.0.0.1:8000/predict", {
+    const predictRes = await fetch(`${API_BASE_URL}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const rulRes = await fetch("http://127.0.0.1:8000/rul", {
+    const rulRes = await fetch(`${API_BASE_URL}/rul`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
