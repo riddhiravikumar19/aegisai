@@ -16,7 +16,12 @@ app = FastAPI(title="AegisAI Prediction API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://aegisai-alpha.vercel.app",
+        "https://aegisai-a8hlwzow0-riddhi-s-projects5.vercel.app",
+        "https://aegisai-71a5sy9dy-riddhi-s-projects5.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,6 +32,7 @@ app.include_router(explain_router)
 app.include_router(insights_router)
 app.include_router(priority_router)
 app.include_router(copilot_router)
+
 class MachineInput(BaseModel):
     Type: int
     air_temperature: float
