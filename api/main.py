@@ -13,16 +13,10 @@ from api.copilot import router as copilot_router
 model = joblib.load("models/aegis_model.pkl")
 
 app = FastAPI(title="AegisAI Prediction API")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://aegisai-alpha.vercel.app",
-        "https://aegisai-a8hlwzow0-riddhi-s-projects5.vercel.app",
-        "https://aegisai-71a5sy9dy-riddhi-s-projects5.vercel.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
